@@ -9,8 +9,9 @@ import AppIntents
 import SwiftUI
 import WidgetKit
 
+@available(iOSApplicationExtension 18.0, macOSApplicationExtension 15.0, *)
 struct widget_newControl: ControlWidget {
-    static let kind: String = "com.example.TimeProgress.widget new"
+    static let kind: String = "com.example.TimeProgress.widget_new.control"
 
     var body: some ControlWidgetConfiguration {
         AppIntentControlConfiguration(
@@ -18,60 +19,49 @@ struct widget_newControl: ControlWidget {
             provider: Provider()
         ) { value in
             ControlWidgetToggle(
-                "Start Timer",
-                isOn: value.isRunning,
-                action: StartTimerIntent(value.name)
-            ) { isRunning in
-                Label(isRunning ? "On" : "Off", systemImage: "timer")
+                "更新時間進度",
+                isOn: value.isRefreshing,
+                action: RefreshTimeProgressIntent()
+            ) { isRefreshing in
+                Label(isRefreshing ? "更新中" : "重新整理", systemImage: "arrow.clockwise")
             }
         }
-        .displayName("Timer")
-        .description("A an example control that runs a timer.")
+        .displayName("時間進度")
+        .description("點一下即可重新整理桌面小工具。")
     }
 }
 
+@available(iOSApplicationExtension 18.0, macOSApplicationExtension 15.0, *)
 extension widget_newControl {
     struct Value {
-        var isRunning: Bool
-        var name: String
+        var isRefreshing: Bool
     }
 
     struct Provider: AppIntentControlValueProvider {
-        func previewValue(configuration: TimerConfiguration) -> Value {
-            widget_newControl.Value(isRunning: false, name: configuration.timerName)
+        func previewValue(configuration: RefreshConfiguration) -> Value {
+            widget_newControl.Value(isRefreshing: false)
         }
 
-        func currentValue(configuration: TimerConfiguration) async throws -> Value {
-            let isRunning = true // Check if the timer is running
-            return widget_newControl.Value(isRunning: isRunning, name: configuration.timerName)
+        func currentValue(configuration: RefreshConfiguration) async throws -> Value {
+            widget_newControl.Value(isRefreshing: false)
         }
     }
 }
 
-struct TimerConfiguration: ControlConfigurationIntent {
-    static let title: LocalizedStringResource = "Timer Name Configuration"
-
-    @Parameter(title: "Timer Name", default: "Timer")
-    var timerName: String
+@available(iOSApplicationExtension 18.0, macOSApplicationExtension 15.0, *)
+struct RefreshConfiguration: ControlConfigurationIntent {
+    static let title: LocalizedStringResource = "時間進度"
 }
 
-struct StartTimerIntent: SetValueIntent {
-    static let title: LocalizedStringResource = "Start a timer"
+@available(iOSApplicationExtension 18.0, macOSApplicationExtension 15.0, *)
+struct RefreshTimeProgressIntent: SetValueIntent {
+    static let title: LocalizedStringResource = "刷新時間進度"
 
-    @Parameter(title: "Timer Name")
-    var name: String
-
-    @Parameter(title: "Timer is running")
+    @Parameter(title: "刷新")
     var value: Bool
 
-    init() {}
-
-    init(_ name: String) {
-        self.name = name
-    }
-
     func perform() async throws -> some IntentResult {
-        // Start the timer…
+        WidgetCenter.shared.reloadTimelines(ofKind: widget_new.kind)
         return .result()
     }
 }

@@ -12,6 +12,5 @@ import SwiftUI
 struct widget_newBundle: WidgetBundle {
     var body: some Widget {
         widget_new()
-        widget_newControl()
     }
 }

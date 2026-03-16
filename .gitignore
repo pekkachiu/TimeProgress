@@ -1,0 +1,14 @@
+# Xcode
+*.xcuserstate
+xcuserdata/
+**/*.xcodeproj/xcuserdata/
+**/*.xcworkspace/xcuserdata/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS
+.DS_Store
+.Spotlight-V100
+.Trashes
